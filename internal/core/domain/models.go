@@ -27,3 +27,9 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	u.ID = uuid.New().String()
 	return
 }
+
+type RevokedToken struct {
+	ID        uint      `gorm:"primaryKey"`
+	Token     string    `gorm:"index;not null"`
+	ExpiresAt time.Time `gorm:"not null"`
+}
