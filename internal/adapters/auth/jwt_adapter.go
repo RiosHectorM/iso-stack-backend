@@ -21,8 +21,6 @@ type CustomClaims struct {
 func (j *JWTAdapter) GenerateToken(user *domain.User) (string, error) {
 	claims := CustomClaims{
 		UserID: user.ID,
-		OrgID:  user.OrganizationID,
-		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},

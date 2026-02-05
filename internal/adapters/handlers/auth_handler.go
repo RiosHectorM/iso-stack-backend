@@ -32,11 +32,9 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 
 	newOrg := domain.Organization{ID: uuid.New().String(), Name: req.OrgName}
 	newUser := domain.User{
-		ID:             uuid.New().String(),
-		Email:          req.Email,
-		Password:       string(hashedPassword),
-		Role:           "Auditor_Lider",
-		OrganizationID: newOrg.ID,
+		ID:       uuid.New().String(),
+		Email:    req.Email,
+		Password: string(hashedPassword),
 	}
 
 	err := h.DB.Transaction(func(tx *gorm.DB) error {
