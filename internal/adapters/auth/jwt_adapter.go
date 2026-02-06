@@ -3,7 +3,6 @@ package auth
 import (
 	"time"
 
-	"github.com/RiosHectorM/iso-stack/internal/core/domain"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -18,9 +17,11 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (j *JWTAdapter) GenerateToken(user *domain.User) (string, error) {
+func (j *JWTAdapter) GenerateToken(userID, orgID, role string) (string, error) {
 	claims := CustomClaims{
-		UserID: user.ID,
+		UserID: userID,
+		OrgID:  orgID,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},

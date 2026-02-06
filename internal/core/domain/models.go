@@ -65,19 +65,20 @@ type UserOrganization struct {
 	UserID         string       `gorm:"primaryKey" json:"user_id"`
 	OrganizationID string       `gorm:"primaryKey" json:"org_id"`
 	RoleDefault    Role         `gorm:"not null" json:"role_default"`
-	Status         MemberStatus `gorm:"default:'Invitado'" json:"status"`
+	Status         MemberStatus `gorm:"default:'Activo'" json:"status"`
 	JoinedAt       time.Time    `json:"joined_at"`
 }
 
 type Audit struct {
 	ID         string      `gorm:"primaryKey" json:"id"`
 	Title      string      `gorm:"not null" json:"title"`
-	OrgOwnerID string      `gorm:"not null" json:"org_owner_id"` // La empresa que la creó
+	OrgOwnerID string      `gorm:"not null;index" json:"org_owner_id"` // La empresa que la creó
 	Status     AuditStatus `gorm:"default:'Planificada'" json:"status"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
 }
 
+// AuditAssignment vincula usuarios a auditorías (Tabla Vínculo Proyecto)
 type AuditAssignment struct {
 	AuditID          string           `gorm:"primaryKey" json:"audit_id"`
 	UserID           string           `gorm:"primaryKey" json:"user_id"`
@@ -90,22 +91,28 @@ type AuditAssignment struct {
 type RevokedToken struct {
 	ID        uint      `gorm:"primaryKey"`
 	Token     string    `gorm:"index;not null"`
-	ExpiresAt time.Time `gorm:"not null"`
+	ExpiresAt time.Time `gorm:"not null;index"`
 }
 
 // --- HOOKS (Generación de UUIDs) ---
 
 func (o *Organization) BeforeCreate(tx *gorm.DB) (err error) {
-	o.ID = uuid.New().String()
+	if o.ID == "" {
+		o.ID = uuid.New().String()
+	}
 	return
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.New().String()
+	if u.ID == "" {
+		u.ID = uuid.New().String()
+	}
 	return
 }
 
 func (a *Audit) BeforeCreate(tx *gorm.DB) (err error) {
-	a.ID = uuid.New().String()
+	if a.ID == "" {
+		a.ID = uuid.New().String()
+	}
 	return
 }

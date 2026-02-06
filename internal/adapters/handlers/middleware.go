@@ -3,13 +3,12 @@ package handlers
 import (
 	"strings"
 
-	"github.com/RiosHectorM/iso-stack/internal/core/domain"
+	"github.com/RiosHectorM/iso-stack/internal/core/ports"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"gorm.io/gorm"
 )
 
-func AuthMiddleware(secret string, db *gorm.DB) fiber.Handler {
+func AuthMiddleware(secret string, repo ports.AuthRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// 1. Obtener el Header Authorization: Bearer <token>
 		authHeader := c.Get("Authorization")
@@ -33,10 +32,13 @@ func AuthMiddleware(secret string, db *gorm.DB) fiber.Handler {
 		if !ok {
 			return c.Status(401).JSON(fiber.Map{"error": "error al procesar claims"})
 		}
-		var count int64
 
-		db.Model(&domain.RevokedToken{}).Where("token = ?", tokenString).Count(&count)
-		if count > 0 {
+		// 4. Verificar Revocación en BD
+		revoked, err := repo.IsTokenRevoked(tokenString)
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "error interno verificando sesión"})
+		}
+		if revoked {
 			return c.Status(401).JSON(fiber.Map{"error": "token revocado, por favor inicie sesión nuevamente"})
 		}
 
